@@ -11,3 +11,9 @@ click
 
 
 https://www.youtube.com/watch?v=YRAIUA-Oc1Y
+
+
+things to do
+- when it grabs something like can or boot reset automatically
+- adjust search for for loop becuase we arent looking at the percent right
+- hard code values for different window sizes? getting relative is hard

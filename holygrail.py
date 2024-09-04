@@ -126,7 +126,7 @@ def forSearchPattern():
     screenX = left + xOffset
     screenY = top + yOffset
     while True:
-        for i in range(screenX,int(screenX+(2 / 100 * width))):
+        for i in range(screenX,int(screenX+(2 / 100 * width)), 3):
             moveTo(i,screenY)
             color = getPixelInWindowRaw(windowTitle,i-left,screenY-top)
             green = color[0][1]
