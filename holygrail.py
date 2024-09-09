@@ -92,7 +92,7 @@ def waitUntilGreen(windowsTitle):
     log_message("the bar is green, casting line, waitUntilGreen done")
     return True
 
-@deprecated(version='1.0.0', reason="Use new_function instead.")
+@deprecated(version='1.0.0', reason="Use forSearchPattern instead")
 def searchForMatch(windowsTitle):
     while True:
         color = getPixelInWindow(windowsTitle, scanX, scanY)
@@ -104,7 +104,7 @@ def searchForMatch(windowsTitle):
             break
     return True
 
-
+@deprecated(version='1.0.0', reason="no need for this lol")
 def getPixelInWindowRaw(windowTitle, xOffset, yOffset):
     windows = gw.getWindowsWithTitle(windowTitle)
     if not windows:
@@ -127,7 +127,8 @@ def getPixelInWindowRaw(windowTitle, xOffset, yOffset):
 
     return pixelColor, screenX, screenY
 
-def forSearchPattern():
+@deprecated(version='1.0.0', reason="split up into subfunctions")
+def forSearchPatternOld():
     xOffsetPercentage = 83
     yOffsetPercentage = 75
     windows = gw.getWindowsWithTitle(windowTitle)
@@ -173,9 +174,70 @@ def forSearchPattern():
             if win32api.GetAsyncKeyState(0x51):
                 print("Q pressed, exiting loop.")
                 return 0
-
-        
+            
+def forSearchPattern():
+    xOffsetPercentage = 83
+    yOffsetPercentage = 75
+    windows = gw.getWindowsWithTitle(windowTitle)
+    if not windows:
+        raise ValueError(f"No window found with the title: {windowTitle}")
     
+    window = windows[0]
+    left, top, width, height = window.left, window.top, window.width, window.height
+
+    validatePercentages(xOffsetPercentage, yOffsetPercentage)
+    
+    xOffset, yOffset = calculateOffsets(xOffsetPercentage, yOffsetPercentage, width, height)
+    screenX, screenY = left + xOffset, top + yOffset
+    
+    scanForColor(screenX, screenY, width, left, top, height, yOffset)
+    
+def validatePercentages(xOffsetPercentage, yOffsetPercentage):
+    if not (0 <= xOffsetPercentage <= 100 and 0 <= yOffsetPercentage <= 100):
+        raise ValueError("Percentages must be between 0 and 100.")
+
+def calculateOffsets(xOffsetPercentage, yOffsetPercentage, width, height):
+    xOffset = int(xOffsetPercentage / 100 * width)
+    yOffset = int(yOffsetPercentage / 100 * height)
+    return xOffset, yOffset
+
+def scanForColor(screenX, screenY, width, left, top, height, yOffset):
+    while True:
+        for i in range(screenX, int(screenX + (2 / 100 * width)), 3):
+            moveTo(i, screenY)
+            pixelColor = capturePixelColor(i, left, top, width, height, yOffset)
+            if isStartColor(pixelColor):
+                triggerAction()
+                return
+            if checkExitKey():
+                return
+
+def capturePixelColor(i, left, top, width, height, yOffset):
+    screenshot = pyautogui.screenshot(region=(left, top, width, height))
+    return screenshot.getpixel((i - left, yOffset))
+
+def isStartColor(color):
+    green, red = color[1], color[0]
+    log_message(f"Green: {green}")
+    return green > startColorThresh and red < 200
+
+def triggerAction():
+    moveTo(submitCoord[0], submitCoord[1])
+    click()
+    log_message("100%, reeling in line, forSearchPattern done")
+
+def checkExitKey():
+    if win32api.GetAsyncKeyState(0x51):  # Q key
+        print("Q pressed, exiting loop.")
+        return True
+    return False
+
+"""
+def gridSweep(): 
+    gridX = [10, 20, 30, 60, 70, 80]    
+    gridY = [20, 20, 20, 40, 40, 40]
+    for i in range()
+"""
 
 #start
 
