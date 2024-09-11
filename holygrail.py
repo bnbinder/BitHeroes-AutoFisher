@@ -175,9 +175,7 @@ def forSearchPatternOld():
                 print("Q pressed, exiting loop.")
                 return 0
             
-def forSearchPattern():
-    xOffsetPercentage = 83
-    yOffsetPercentage = 75
+def getScreenValues(xOffsetPercentage, yOffsetPercentage):
     windows = gw.getWindowsWithTitle(windowTitle)
     if not windows:
         raise ValueError(f"No window found with the title: {windowTitle}")
@@ -189,7 +187,14 @@ def forSearchPattern():
     
     xOffset, yOffset = calculateOffsets(xOffsetPercentage, yOffsetPercentage, width, height)
     screenX, screenY = left + xOffset, top + yOffset
-    
+    return screenX, screenY, width, left, top, height, xOffset, yOffset
+            
+def forSearchPattern():
+    duration = 5
+    startTime = time.time()
+    while time.time() - startTime < duration:
+        gridSweep()
+    screenX, screenY, width, left, top, height, xOffset, yOffset = getScreenValues(83, 75)
     scanForColor(screenX, screenY, width, left, top, height, yOffset)
     
 def validatePercentages(xOffsetPercentage, yOffsetPercentage):
@@ -221,6 +226,11 @@ def isStartColor(color):
     log_message(f"Green: {green}")
     return green > startColorThresh and red < 200
 
+def isBlack(color, blackThresh):
+    r,g,b = color[0], color[1], color[2]
+    log_message(f"Red: {r}, Green: {g}, Blue {b}")
+    return r < blackThresh and g < blackThresh and b < blackThresh
+
 def triggerAction():
     moveTo(submitCoord[0], submitCoord[1])
     click()
@@ -232,12 +242,30 @@ def checkExitKey():
         return True
     return False
 
-"""
+
 def gridSweep(): 
     gridX = [10, 20, 30, 60, 70, 80]    
-    gridY = [20, 20, 20, 40, 40, 40]
-    for i in range()
-"""
+    gridY = [20, 40]
+    colors = [0] * 12 
+    black = True
+    avgColor = [0,0,0]
+    for x in range(0, 6):
+        for y in range (0,2):
+            screenX, screenY, width, left, top, height, xOffset, yOffset = getScreenValues(gridX[x], gridY[y])
+            pixelColor = capturePixelColor(screenX, left, top, width, height, yOffset)
+            moveTo(screenX, screenY)
+            colors[x * 2 + y] = pixelColor
+    for i in range(0,12):
+        for j in range(0,3):
+            avgColor[j] = colors[i][j]  
+    r = avgColor[0]
+    g = avgColor[1]
+    b = avgColor[2]
+    if not isBlack(pixelColor, 10):
+        black = False
+    log_message(f"avgRed: {r}, avgGreen: {g}, avgBlue {b}")
+    log_message(f"is black: {black}")
+
 
 #start
 
