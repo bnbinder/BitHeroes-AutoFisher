@@ -16,6 +16,7 @@ scanX = 82
 scanY = 75
 submitCoord = [0,0]
 windowTitle = "Bit Heroes"  
+trash = False
 
 def log_message(task):
     current_time = datetime.now().strftime('%H:%M:%S')
@@ -41,6 +42,11 @@ def click():
     time.sleep(0.01)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
     log_message("click done")
+
+def space():
+    win32api.keybd_event(win32con.VK_SPACE, 0, 0, 0)
+    time.sleep(0.05)
+    win32api.keybd_event(win32con.VK_SPACE, 0, win32con.KEYEVENTF_KEYUP, 0)
 
 def getPixelInWindow(windowTitle, xOffsetPercentage, yOffsetPercentage):
     windows = gw.getWindowsWithTitle(windowTitle)
@@ -190,10 +196,6 @@ def getScreenValues(xOffsetPercentage, yOffsetPercentage):
     return screenX, screenY, width, left, top, height, xOffset, yOffset
             
 def forSearchPattern():
-    duration = 5
-    startTime = time.time()
-    while time.time() - startTime < duration:
-        gridSweep()
     screenX, screenY, width, left, top, height, xOffset, yOffset = getScreenValues(83, 75)
     scanForColor(screenX, screenY, width, left, top, height, yOffset)
     
@@ -207,10 +209,16 @@ def calculateOffsets(xOffsetPercentage, yOffsetPercentage, width, height):
     return xOffset, yOffset
 
 def scanForColor(screenX, screenY, width, left, top, height, yOffset):
+    global trash
+    duration = 25
+    startTime = time.time()
     while True:
         for i in range(screenX, int(screenX + (2 / 100 * width)), 3):
             moveTo(i, screenY)
             pixelColor = capturePixelColor(i, left, top, width, height, yOffset)
+            if time.time() - startTime > duration:
+                trash = True
+                return
             if isStartColor(pixelColor):
                 triggerAction()
                 return
@@ -288,9 +296,7 @@ try:
         time.sleep(2)
         click()
         time.sleep(1)
-        win32api.keybd_event(win32con.VK_SPACE, 0, 0, 0)
-        time.sleep(0.05)
-        win32api.keybd_event(win32con.VK_SPACE, 0, win32con.KEYEVENTF_KEYUP, 0)
+        space()
         time.sleep(1)
         print("wedone")
         if win32api.GetAsyncKeyState(0x51):
