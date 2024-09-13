@@ -16,7 +16,6 @@ scanX = 82
 scanY = 75
 submitCoord = [0,0]
 windowTitle = "Bit Heroes"  
-trash = False
 
 def log_message(task):
     current_time = datetime.now().strftime('%H:%M:%S')
@@ -42,11 +41,6 @@ def click():
     time.sleep(0.01)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
     log_message("click done")
-
-def space():
-    win32api.keybd_event(win32con.VK_SPACE, 0, 0, 0)
-    time.sleep(0.05)
-    win32api.keybd_event(win32con.VK_SPACE, 0, win32con.KEYEVENTF_KEYUP, 0)
 
 def getPixelInWindow(windowTitle, xOffsetPercentage, yOffsetPercentage):
     windows = gw.getWindowsWithTitle(windowTitle)
@@ -181,7 +175,9 @@ def forSearchPatternOld():
                 print("Q pressed, exiting loop.")
                 return 0
             
-def getScreenValues(xOffsetPercentage, yOffsetPercentage):
+def forSearchPattern():
+    xOffsetPercentage = 83
+    yOffsetPercentage = 75
     windows = gw.getWindowsWithTitle(windowTitle)
     if not windows:
         raise ValueError(f"No window found with the title: {windowTitle}")
@@ -193,10 +189,7 @@ def getScreenValues(xOffsetPercentage, yOffsetPercentage):
     
     xOffset, yOffset = calculateOffsets(xOffsetPercentage, yOffsetPercentage, width, height)
     screenX, screenY = left + xOffset, top + yOffset
-    return screenX, screenY, width, left, top, height, xOffset, yOffset
-            
-def forSearchPattern():
-    screenX, screenY, width, left, top, height, xOffset, yOffset = getScreenValues(83, 75)
+    
     scanForColor(screenX, screenY, width, left, top, height, yOffset)
     
 def validatePercentages(xOffsetPercentage, yOffsetPercentage):
@@ -209,17 +202,10 @@ def calculateOffsets(xOffsetPercentage, yOffsetPercentage, width, height):
     return xOffset, yOffset
 
 def scanForColor(screenX, screenY, width, left, top, height, yOffset):
-    global trash
-    duration = 25
-    startTime = time.time()
     while True:
         for i in range(screenX, int(screenX + (2 / 100 * width)), 3):
             moveTo(i, screenY)
             pixelColor = capturePixelColor(i, left, top, width, height, yOffset)
-            if time.time() - startTime > duration:
-                trash = True
-                log_message("this is trash, skipping")
-                return
             if isStartColor(pixelColor):
                 triggerAction()
                 return
@@ -235,11 +221,6 @@ def isStartColor(color):
     log_message(f"Green: {green}")
     return green > startColorThresh and red < 200
 
-def isBlack(color, blackThresh):
-    r,g,b = color[0], color[1], color[2]
-    log_message(f"Red: {r}, Green: {g}, Blue {b}")
-    return r < blackThresh and g < blackThresh and b < blackThresh
-
 def triggerAction():
     moveTo(submitCoord[0], submitCoord[1])
     click()
@@ -251,30 +232,12 @@ def checkExitKey():
         return True
     return False
 
-
+"""
 def gridSweep(): 
     gridX = [10, 20, 30, 60, 70, 80]    
-    gridY = [20, 40]
-    colors = [0] * 12 
-    black = True
-    avgColor = [0,0,0]
-    for x in range(0, 6):
-        for y in range (0,2):
-            screenX, screenY, width, left, top, height, xOffset, yOffset = getScreenValues(gridX[x], gridY[y])
-            pixelColor = capturePixelColor(screenX, left, top, width, height, yOffset)
-            moveTo(screenX, screenY)
-            colors[x * 2 + y] = pixelColor
-    for i in range(0,12):
-        for j in range(0,3):
-            avgColor[j] = colors[i][j]  
-    r = avgColor[0]
-    g = avgColor[1]
-    b = avgColor[2]
-    if not isBlack(pixelColor, 10):
-        black = False
-    log_message(f"avgRed: {r}, avgGreen: {g}, avgBlue {b}")
-    log_message(f"is black: {black}")
-
+    gridY = [20, 20, 20, 40, 40, 40]
+    for i in range()
+"""
 
 #start
 
@@ -289,21 +252,19 @@ try:
         clickedIt = False
         foundIt = proceed(windowTitle)
         if foundIt:
-            log_message("found it true")
             clickedIt = waitUntilGreen(windowTitle)
         if clickedIt: 
-            log_message("clicked it true")
             #searchForMatch(windowTitle)
             forSearchPattern()
-            log_message("for search pattern done")
-            time.sleep(3)
-            log_message("space done")
-            space()
-            time.sleep(1)
-            log_message("second space done")
-            space()
-            time.sleep(1)
-            print("wedone")
+
+        time.sleep(2)
+        click()
+        time.sleep(1)
+        win32api.keybd_event(win32con.VK_SPACE, 0, 0, 0)
+        time.sleep(0.05)
+        win32api.keybd_event(win32con.VK_SPACE, 0, win32con.KEYEVENTF_KEYUP, 0)
+        time.sleep(1)
+        print("wedone")
         if win32api.GetAsyncKeyState(0x51):
             print("Q pressed, exiting loop.")
             break
