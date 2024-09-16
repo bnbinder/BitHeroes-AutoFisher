@@ -4,7 +4,6 @@ import pyautogui
 import time
 import win32api
 import win32con
-from deprecated import deprecated
 from enum import Enum
 import sys
 
@@ -32,9 +31,12 @@ percentFish = {
     "yPercent": 75
 }
 
-windowTitle = "Bit Heroes" 
-stepper = 3
 event = Event.findStartButtonAndClick
+runningfirsttimePERCENT = True
+
+stepper = 3
+timeBeforeEndingPopup = 5
+windowTitle = "Bit Heroes" 
 
 def log_message(task):
     current_time = datetime.now().strftime('%H:%M:%S')
@@ -45,11 +47,6 @@ def log_time():
     current_time = datetime.now().strftime('%H:%M:%S')
     log_text = f"[{current_time}]"
     print(log_text, end="")
-
-def getScreenSize():
-    screenWidth, screenHeight = pyautogui.size()
-    log_message("getScreenSize done")
-    return screenWidth, screenHeight
 
 def moveTo(x, y):
     win32api.SetCursorPos((int(x), int(y)))
@@ -134,7 +131,6 @@ def getPixelInWindowCANDS(xOffsetPercentage, yOffsetPercentage):
 
     return pixelColor, screenX, screenY
 
-
 def findStartButtonAndClick():
     global event
     color, screenX, screenY = getPixelInWindowCANDS(startButtonValues["xPercent"], startButtonValues["yPercent"])
@@ -161,7 +157,10 @@ def waitUntilGreenAndFish():
     log_message("could not find green, waitUntilGreenAndFish unsuccessfull")
 
 def waitUntilPercentThenReelIn():
+    global runningfirsttimePERCENT
     global event
+    global startTime 
+    duration = 26
     windows = gw.getWindowsWithTitle(windowTitle)
     if not windows:
         raise ValueError(f"No window found with the title: {windowTitle}")
@@ -176,10 +175,9 @@ def waitUntilPercentThenReelIn():
     yOffset = int(percentFish["yPercent"] / 100 * height)
     
     screenX, screenY = left + xOffset, top + yOffset
-
-    duration = 26
-    startTime = time.time()
-
+    if runningfirsttimePERCENT:
+        startTime = time.time()
+        runningfirsttimePERCENT = False
     for i in range(screenX, int(screenX + (2 / 100 * width)), stepper):
         moveTo(i, screenY)
         screenshot = pyautogui.screenshot(region=(left, top, width, height))
@@ -208,7 +206,8 @@ try:
             case Event.waitUntilPercentThenReelIn:
                 waitUntilPercentThenReelIn()
             case Event.reapRewards:
-                time.sleep(3)
+                runningfirsttimePERCENT = True
+                time.sleep(timeBeforeEndingPopup)
                 space()
                 time.sleep(1)
                 space()
