@@ -33,6 +33,7 @@ percentFish = {
 
 event = Event.findStartButtonAndClick
 runningfirsttimePERCENT = True
+missedFish = False
 
 stepper = 3
 timeBeforeEndingPopup = 5
@@ -191,8 +192,14 @@ def waitUntilPercentThenReelIn():
             event =  Event.reapRewards
             return
         if time.time() - startTime > duration:
-            log_message("this is trash, skipping")
+            log_message("this is trash or missed fish, skipping")
             event =  Event.reapRewards
+            if getPixelInWindowColor(startButtonValues["xScreen"], startButtonValues["yScreen"])[1] > startButtonValues["thresholdGreen"]:
+                missedFish = False
+                log_message("This is not a missed fish")
+            else:
+                missedFish = True
+                log_message("This is a missed fish")
             return
 
 try:
@@ -210,10 +217,12 @@ try:
                 time.sleep(timeBeforeEndingPopup)
                 space()
                 time.sleep(1)
-                space()
+                if missedFish == False:
+                    space()
+                missedFish = False
                 log_message("iteration over, fishing again")
                 event = Event.findStartButtonAndClick
         quitGame()
     
 except ValueError as e:
-    print("error has occured: " + e)
+    print("error has occured: " + str(e))
