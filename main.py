@@ -133,6 +133,7 @@ def getPixelInWindowCANDS(xOffsetPercentage, yOffsetPercentage):
     return pixelColor, screenX, screenY
 
 def findStartButtonAndClick():
+    print("\nfind start button and click\n")
     global event
     color, screenX, screenY = getPixelInWindowCANDS(startButtonValues["xPercent"], startButtonValues["yPercent"])
     green = color[1]
@@ -144,17 +145,21 @@ def findStartButtonAndClick():
         click()
         log_message("found and clicked start button, findStartButtonAndClick done")
         event = Event.waitUntilGreenAndFish
+        return
     log_message("could not find button, findStartButtonAndClick unsuccessfull")
 
 def waitUntilGreenAndFish():
+    print("\nwait until green and fish\n")
     global event
     color = getPixelInWindowColor(fishBar["xPercent"], fishBar["yPercent"])
     green = color[1]
     if(green > startButtonValues["thresholdGreen"]):
-        moveTo(startButtonValues["xScreen"], startButtonValues["yScreen"])
-        click()
+        #moveTo(startButtonValues["xScreen"], startButtonValues["yScreen"])
+        #click()
+        space()
         log_message("the bar is green, casting line, waitUntilGreenAndFish done")
         event = Event.waitUntilPercentThenReelIn
+        return
     log_message("could not find green, waitUntilGreenAndFish unsuccessfull")
 
 def waitUntilPercentThenReelIn():
